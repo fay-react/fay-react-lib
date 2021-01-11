@@ -1,8 +1,5 @@
-import {getQueryString, promise, reqGetBrace, reqPostBrace} from './request';
+import put from './put';
 
-export default ({path, data, contentType, defaultQuery = true}: Args) => {
-	if(defaultQuery){
-		return promise(path + (typeof data === 'object' ? getQueryString(data) : data || ''), reqGetBrace({method: 'PUT'}), 'json');
-	}
-	return promise(path, reqPostBrace({method: 'PUT', params: data, contentType}), 'json');
+export default ({path, data, defaultQuery = true, headers}: Args) => {
+	return put({path, data, defaultQuery, headers, type: 'json'});
 };

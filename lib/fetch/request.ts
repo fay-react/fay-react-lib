@@ -5,23 +5,38 @@ import {getPublicPathWithoutStartAndEndForwardSlash} from '../publicPath';
 import {getUser} from '../user';
 
 const authorization = () => {
-	const user = getUser();
-	const Authorization = {token: user ? user.token:''};
-	return JSON.stringify(Authorization);
+  const user = getUser();
+  let authorization = undefined;
+  if(user && user.token){
+    const {token, tokenType} = user;
+    if(tokenType === 'Bearer Token'){
+      authorization = 'Bearer ' + token;
+    }else{
+      authorization = JSON.stringify({token});
+    }
+  }
+	return authorization;
 };
 
-interface Header {
-	contentType?: string,
-	acceptType?: string,
-	auth?: boolean
+export interface HeadersType {
+	[key: string]: any
 }
 
-const headers = ({contentType, acceptType='application/json', auth}: Header) => {
-	const newHeaders = new Headers();
-	contentType && newHeaders.append('Content-Type', contentType);
-	newHeaders.append('Accept', acceptType);
-	auth && newHeaders.append("Authorization", authorization());
-	return newHeaders;
+const getHeaders = (headers?: HeadersType) => {
+  // const newHeaders = new Headers({
+  //   'Content-Type': contentType,
+  //   'Accept': acceptType,
+  //   'Authorization': authorization(),
+  // });
+	// contentType && newHeaders.append('Content-Type', contentType);
+	// newHeaders.append('Accept', acceptType);
+	// auth && newHeaders.append("Authorization", authorization());
+	return {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    'Authorization': authorization(),
+    ...headers
+  };
 };
 
 export const getQueryString = (params:any) => {
@@ -42,27 +57,33 @@ interface ReqBrace {
 	acceptType?: string,
 	auth?: boolean,
 	params?: any,
-	cache?: string
+  cache?: string
+  headers?: HeadersType
 }
 
-export const reqGetBrace = ({method, contentType, acceptType, auth=true, cache='no-cache'}:ReqBrace) => {
+export const reqGetBrace = ({method, cache='no-cache', headers}:ReqBrace) => {
 	return {
 		method,
-		headers: headers({contentType, acceptType, auth}),
+		headers: getHeaders(headers),
 		credentials: 'same-origin',
 		mode: 'cors',
 		cache
 	};
 };
 
-export const reqPostBrace = ({method, params = {}, contentType='application/json', acceptType, auth=true}:ReqBrace) => {
+export const reqPostBrace = ({method, params = {}, headers}:ReqBrace) => {
+  const contentType = headers ? headers['Content-Type'] : undefined;
+  let body = params;
+  if((!contentType || contentType === 'application/json') && typeof params === 'object'){
+    body = JSON.stringify(params);
+  }
 	return {
 		method,
-		headers: headers({contentType, acceptType, auth}),
+		headers: getHeaders(headers),
 		credentials: 'same-origin',
 		mode: 'cors',
 		cache: 'no-cache',
-		body: contentType === 'application/json' ? typeof params === 'object' ? JSON.stringify(params) : params : params
+		body
 	};
 };
 
@@ -70,7 +91,13 @@ export interface CustomPromise extends Promise<any>{
 	abort: Function
 }
 
-export const promise = (url:string, options = {}, type?:string) => {
+interface PromiseType{
+  url:string
+  options: object
+  type?:string
+}
+
+export const promise = ({url, options = {}, type}: PromiseType) => {
   let controller: AbortController | undefined;
   let signal: AbortSignal|undefined = undefined;
   try {

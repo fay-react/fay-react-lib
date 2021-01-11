@@ -1,3 +1,3 @@
-const config = require('@fay-react/tool/config/babel/config');
+const config = require('@fay-next/config/babel/config');
 
 module.exports = config;

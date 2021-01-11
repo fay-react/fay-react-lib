@@ -1,46 +1,30 @@
 /**
  * Created by feichongzheng on 17/9/28.
  */
-import cookie from 'react-cookie';
+import cookies from './cookie';
 
 const baseOption = {
   path: '/'
 };
 
-const isLogin = () => {
-  const user = getUser();
-  return typeof user === 'object';
-};
-
-const logout = (history:{push: Function}, location:object) => {
-  cookie.remove('current-user', baseOption);
-  history.push('/login', {
-    from: location
-  });
-};
-
-const goToLogin = (history:{push: Function}, location:object) => {
-  cookie.remove('current-user');
-  history.push('/login', {
-    from: location
-  });
-};
-
-const saveUser = (value:object, rememberTime?:number) => {
+const setUser = (value:object, rememberTime?:number) => {
   const opt = rememberTime ? {...baseOption,
     maxAge: rememberTime,
     expires: new Date(new Date().getTime() + rememberTime * 1000)
   } : baseOption;
-  cookie.save('current-user', value, opt);
+  cookies.set('current-user', value, opt);
 };
 
 const removeUser = () => {
-  saveUser({}, -1);
-  // cookie.remove('current-user');
+  const opt = {...baseOption,
+    maxAge: -1,
+    expires: new Date(new Date().getTime() + -1 * 1000)
+  };
+  cookies.remove('current-user', opt);
 };
 
 const getUser = () => {
-  return cookie.load('current-user');
+  return cookies.get('current-user');
 }
 
-export { getUser, isLogin, logout, goToLogin, saveUser, removeUser };
+export { getUser, setUser, removeUser };

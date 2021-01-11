@@ -1,6 +1,5 @@
-import {getQueryString, promise, reqGetBrace} from './request';
+import get from './get';
 
-
-export default ({path, data, cache}: Args) => {
-	return promise(path + (typeof data === 'object' ? getQueryString(data) : data || ''), reqGetBrace({method: 'GET', cache}), 'json');
+export default ({path, data, cache, headers}: Args) => {
+	return get({path, data, cache, headers, type: 'json'});
 };

@@ -1,5 +1,5 @@
-import cookie from 'react-cookie';
+import Cookies from 'universal-cookie';
 
-export const load = cookie.load;
-export const remove = cookie.remove;
-export const save = cookie.save;
+const cookies = new Cookies();
+
+export default cookies;

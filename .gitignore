@@ -5,3 +5,5 @@ dist/
 /pub
 ._.DS_Store
 .DS_Store
+.next/
+out/

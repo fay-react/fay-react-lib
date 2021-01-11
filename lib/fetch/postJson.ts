@@ -1,5 +1,5 @@
-import {promise, reqPostBrace} from './request';
+import post from './post';
 
-export default ({path, data, contentType, auth}: Args) => {
-	return promise(path, reqPostBrace({method: 'POST', params: data, contentType, auth}), 'json');
+export default ({path, data, headers}: Args) => {
+	return post({path, data, headers, type: 'json'});
 };
